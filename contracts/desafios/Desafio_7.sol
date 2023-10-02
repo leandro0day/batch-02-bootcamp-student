@@ -21,38 +21,94 @@ interface IMiPrimerTKN {
 }
 
 contract AirdropTwo is Pausable, AccessControl {
-    // instanciamos el token en el contrato
     IMiPrimerTKN miPrimerToken;
 
-    constructor(address _tokenAddress) {}
+    // Mapeo para llevar un registro de las participaciones de cada usuario
+    mapping(address => uint256) public participaciones;
+    mapping(address => uint256) public ultimaVezParticipado;
 
-    function participateInAirdrop() public {}
+    // Límite de participaciones por día y total
+    uint256 public limiteDiario = 1;
+    uint256 public limiteTotal = 10;
 
-    function participateInAirdrop(address _elQueRefirio) public {}
+    // Días adicionales para el referente
+    uint256 public diasAdicionalesPorReferido = 3;
 
-    ///////////////////////////////////////////////////////////////
-    ////                     HELPER FUNCTIONS                  ////
-    ///////////////////////////////////////////////////////////////
+    // Evento para registrar las participaciones
+    event Participacion(address indexed participante, uint256 tokens);
 
-    function _getRadomNumber10005000() internal view returns (uint256) {
-        return
-            (uint256(keccak256(abi.encodePacked(block.timestamp, msg.sender))) %
-                4000) +
-            1000 +
-            1;
-    }
-
-    function setTokenAddress(address _tokenAddress) external {
+    constructor(address _tokenAddress) {
         miPrimerToken = IMiPrimerTKN(_tokenAddress);
     }
 
-    function transferTokensFromSmartContract()
-        external
-        onlyRole(DEFAULT_ADMIN_ROLE)
-    {
-        miPrimerToken.transfer(
-            msg.sender,
-            miPrimerToken.balanceOf(address(this))
-        );
+    function participateInAirdrop() public whenNotPaused {
+        address participante = msg.sender;
+
+        // Verificar límite diario
+        require(participaciones[participante] < limiteDiario, "Ya participaste en el ultimo dia");
+
+        // Verificar límite total
+        require(participaciones[participante] < limiteTotal, "Llegaste al limite de participaciones");
+
+        // Verificar que el contrato tenga suficientes tokens
+        uint256 balanceContrato = miPrimerToken.balanceOf(address(this));
+        require(balanceContrato >= 1000, "El contrato Airdrop no tiene tokens suficientes");
+
+        // Calcular tokens aleatorios
+        uint256 tokensGanados = _getRadomNumber10005000();
+
+        // Transferir tokens al participante
+        miPrimerToken.transfer(participante, tokensGanados);
+
+        // Registrar participación
+        participaciones[participante]++;
+        ultimaVezParticipado[participante] = block.timestamp;
+
+        emit Participacion(participante, tokensGanados);
+    }
+
+    function participateInAirdrop(address _elQueRefirio) public whenNotPaused {
+        address participante = msg.sender;
+        address referente = _elQueRefirio;
+
+        // Verificar que no pueda referirse a sí mismo
+        require(participante != referente, "No puedes autoreferirte");
+
+        // Verificar límite diario
+        require(participaciones[participante] < limiteDiario, "Ya participaste en el ultimo dia");
+
+        // Verificar límite total
+        require(participaciones[participante] < limiteTotal, "Llegaste al limite de participaciones");
+
+        // Verificar que el contrato tenga suficientes tokens
+        uint256 balanceContrato = miPrimerToken.balanceOf(address(this));
+        require(balanceContrato >= 1000, "El contrato Airdrop no tiene tokens suficientes");
+
+        // Calcular tokens aleatorios
+        uint256 tokensGanados = _getRadomNumber10005000();
+
+        // Transferir tokens al participante
+        miPrimerToken.transfer(participante, tokensGanados);
+
+        // Registrar participación
+        participaciones[participante]++;
+        ultimaVezParticipado[participante] = block.timestamp;
+
+        // Si el referente existe, aumentar su límite de participación
+        if (participaciones[referente] > 0) {
+            limiteTotal += diasAdicionalesPorReferido;
+        }
+
+        emit Participacion(participante, tokensGanados);
+    }
+
+     function setTokenAddress(address _tokenAddress) external {
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
+        miPrimerToken = IMiPrimerTKN(_tokenAddress);
+    }
+
+    function _getRadomNumber10005000() internal view returns (uint256) {
+        return (uint256(keccak256(abi.encodePacked(block.timestamp, msg.sender))) % 4000) + 1000;
     }
 }
+

