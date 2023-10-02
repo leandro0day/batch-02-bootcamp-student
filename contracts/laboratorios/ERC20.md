@@ -22,7 +22,7 @@ En este laboratorio, aprenderemos cómo interactuar con los métodos del estánd
 
    ```solidity
    // SPDX-License-Identifier: MIT
-   pragma solidity 0.8.19;
+   pragma solidity 0.8.18;
 
    import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
@@ -239,7 +239,12 @@ En este laboratorio, aprenderemos cómo interactuar con los métodos del estánd
 
 27. Responde a esta pregunta:
     1. ¿Qué es lo que más te llamó la atención de este estándar?
+
+    R: Sinceramente todo, es muy emocionante para mi estar aprendiendo todo lo relacionado con la blockchain y los smartContract.
+
     2. ¿Alguna funcionalidad que crees que está faltando? ¿Qué quitarías o añadirías?
+    
+    R:Me parecen que estan muy bien, pero seguire investigando haber si encuentro algo que le haga falta.
 
 ## Conclusión
 

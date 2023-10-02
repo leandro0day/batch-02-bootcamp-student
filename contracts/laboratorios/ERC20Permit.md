@@ -46,11 +46,11 @@ Veámoslo gráficamente:
 
    ```solidity
    // SPDX-License-Identifier: MIT
-   pragma solidity 0.8.19;
-
+   pragma solidity 0.8.18;
+   
    import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
    import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Permit.sol";
-
+   
    contract Token20Permit is ERC20, ERC20Permit {
        constructor()
            ERC20("Token20 Permit", "TKN20PER")
@@ -75,7 +75,7 @@ Veámoslo gráficamente:
 
    - `permit()`: este método es el que finalmente altera el mapping de `allowances`. El punto de partida son los parámetros definidos por el `Propietario` que son los siguientes: `owner`, `spender`, `value` y `deadline`. Así también, el `Propietario` crea la firma digital descompuesta en `v`, `r`, y `s`, lo cual veremos cómo se genera más adelante.
    - `nonces()`: es la cantidad de permisos otorgados de aquel que generó la firma. Se usa como técnica para evitar el replay attack (o ataque de repetición). Internamente se lleva dicha cuenta y se incrementa cada vez que el método `permit` se ejecuta por un `Propietario` en particular.
-   - `DOMAIN_SEPARATOR()`: Este método es definido de acuerdo al [`EIP712`](https://eips.ethereum.org/EIPS/eip-712). El objetivo es crear un dominio único de aplicación para el token que usará el `ERC20Permit`. De ese modo la firma digital será valida únicamente en este contrato (y no en otro que también implementa `ERC20Permit`).
+   - `DOMAIN_SEPARATOR()`: Este método es definido de acuerdo al [`EIP712`](https://eips.ethereum.org/EIPS/eip-712). El objetivo  es crear un dominio único de aplicación para el token que usará el `ERC20Permit`. De ese modo la firma digital será valida únicamente en este contrato (y no en otro que también implementa `ERC20Permit`).
 
 4. Antes de continuar, voy a preparar tres billeteras (o addresses): el `Propietario` de los tokens, el `Gastador` y una billetera `X` que será el que ejecuta el `permit()`. En mi caso son las siguientes (en tu caso serán otros valores):
 
@@ -200,9 +200,21 @@ Si lograste este resultado, felicidades. Haz realizado con éxitos este laborato
 ## Preguntas
 
 1. ¿En qué situaciones consideras que es beneficioso para el dueño de los tokens obviar el pago por transferencia de tokens?
+R:Puede ser beneficioso para el dueño de los tokens obviar el pago por transferencia en situaciones de desarrollo y pruebas para evitar gastos innecesarios en la red de Ethereum y facilitar la depuración de contratos inteligentes. 
 2. ¿Logras identificar algunos vectores de ataque? ¿Indaga cómo [`EPI712`](https://eips.ethereum.org/EIPS/eip-712) y [`ERC2612`](https://eips.ethereum.org/EIPS/eip-2612) alivian potenciales vulnerabilidades?
+R:Vector de ataque sin EIP-712 (Ethereum Improvement Proposal 712):
 
+Ataque de phishing: Un atacante podría crear un sitio web falso que imite a una billetera legítima y engañar a los usuarios para que firmen transacciones maliciosas. Sin EIP-712, los usuarios pueden no ser conscientes de los detalles de la transacción que están firmando.
+
+Cómo EIP-712 alivia la vulnerabilidad: EIP-712 mejora la seguridad permitiendo que los usuarios vean y verifiquen los detalles de la transacción antes de confirmarla. Los usuarios pueden identificar fácilmente si están firmando una transacción legítima o si están siendo víctimas de un ataque de phishing.
+
+Vector de ataque sin ERC-2612 (Ethereum Request for Comment 2612):
+
+Aprobación no deseada: En ausencia de ERC-2612, un atacante podría forjar la aprobación de un usuario para transferir sus tokens sin su conocimiento o consentimiento explícito.
+
+Cómo ERC-2612 alivia la vulnerabilidad: ERC-2612 requiere que los usuarios aprueben explícitamente cada transferencia de tokens antes de que se ejecute. Esto evita que los atacantes realicen transferencias no autorizadas y proporciona un control más sólido sobre los activos del usuario.
 ## Tarea
 
-1. Publica otro token similar a `Token20Permit` con tu propio nombre (seguido de la palabra `permi`) y símbolo. Pega el address aquí:
-2. Como `Propietario` genera una firma off-chain. Utiliza una address que represente a `X` y utiliza la firma off-chain para ejecutar el método `permit`. Pega el hash de la transacción aquí:
+1. Publica otro token similar a `Token20Permit` con tu propio nombre (seguido de la palabra `permi`) y símbolo. Pega el address aquí:0x305df6c543E6f2973dbd662b155C12C2C45B3c73.
+
+2. Como `Propietario` genera una firma off-chain. Utiliza una address que represente a `X` y utiliza la firma off-chain para ejecutar el método `permit`. Pega el hash de la transacción aquí:0x61103dc03af448d692651c5f58894929d73c95f02d473a5f543882ed73a78d70.

@@ -26,13 +26,6 @@ pragma solidity 0.8.19;
  *   nombre modifer: soloEnTiempo
  *   aplicar al método: metodoTiempoProtegido
  *
- * 4
- * - pausa: que un método pueda ser pausado y reanudado
- *   nombre modifer: pausa
- *   aplicar al método: metodoPausaProtegido
- *   Adicional:
- *   - definir un método para cambiar ese booleano que tenga el modifier de soloAdmin
- *   - nombre del metodo: cambiarPausa
  *
  *
  * Notas:
@@ -52,21 +45,28 @@ contract Desafio_2 {
 
     modifier soloAdmin() {
         // definir logica
+        require(msg.sender == admin, "No eres el admin");
         _;
     }
 
-    // function metodoAccesoProtegido() {
-    //     // ...logica
-    // }
+    function metodoAccesoProtegido() public soloAdmin {}
 
     // 2
     // definir lista blanca con un mapping
     // mapping listaBlanca;
+    mapping(address => bool) listaBlanca;
+
     // modifier soloListaBlanca
+    modifier soloListaBlanca() {
+        require(listaBlanca[msg.sender], "Fuera de la lista blanca");
+        _;
+    }
 
-    // function metodoPermisoProtegido
+    function metodoPermisoProtegido() public soloListaBlanca {}
 
-    // function incluirEnListaBlanca
+    function incluirEnListaBlanca(address usuario) public soloAdmin {
+        listaBlanca[usuario] = true;
+    }
 
     // 3
     // definir un rango de tiempo cualquiera (e.g. hoy + 30 days)
@@ -74,15 +74,38 @@ contract Desafio_2 {
     uint256 public tiempoLimite = block.timestamp + 30 days;
 
     // modifier soloEnTiempo
+    modifier soloEnTiempo() {
+        require(block.timestamp <= tiempoLimite, "Fuera de tiempo");
+        _;
+    }
 
     // function metodoTiempoProtegido
+    function metodoTiempoProtegido() public soloEnTiempo {}
+
+/*  * 4
+ * - pausa: que un método pueda ser pausado y reanudado
+ *   nombre modifer: pausa
+ *   aplicar al método: metodoPausaProtegido
+ *   Adicional:
+ *   - definir un método para cambiar ese booleano que tenga el modifier de soloAdmin
+ *   - nombre del metodo: cambiarPausa */
 
     // 4
     // definir un booleano para pausar
     // bool public pausado;
+    bool public pausado;
+
     // modifier pausa
+    modifier pausa() {
+        require(!pausado, "El metodo esta pausado");
+        _;
+    }
 
     // function metodoPausaProtegido
+    function metodoPausaProtegido() public pausa {}
 
     // function cambiarPausa()
+    function cambiarPausa() public soloAdmin {
+        pausado = !pausado;
+    }
 }

@@ -180,5 +180,5 @@ Realizar esta tarea y guardar la información solicitada en este mismo README.md
 2. Vas a publicar el contrato `HackerMoneda.sol` en la red Mumbai con las siguientes consideraciones:
    * En vez de enviar `1 ether`, solo envía `1000` al contrato `Moneda.sol` cuando se hace el llamado al método `flip()` desde el método `attack()`.
 3. Ejecuta el método `attack()` del contrato `HackerMoneda.sol`. La operación debe ser exitosa y el contrato `HackerMoneda.sol` debería tener ahora un balance de `2000`
-4. Copiar aquí el address del contrato  `Moneda.sol` en Mumbai:
-5. Copiar aquí el address del contrato  `HackerMoneda.sol` de Mumbai:
+4. Copiar aquí el address del contrato  `Moneda.sol` en Mumbai: 0xa3d06541134e7D8BE5d253D99b3caF7DD7C68d79.
+5. Copiar aquí el address del contrato  `HackerMoneda.sol` de Mumbai:0x3A1eF637e9F39F277e9993Ee4F74AaD2aC44d87a.
