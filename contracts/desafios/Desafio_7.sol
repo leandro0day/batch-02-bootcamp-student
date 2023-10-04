@@ -12,103 +12,120 @@ REPETIBLE CON LÍMITE, PREMIO POR REFERIDO
 * El contrato Airdrop mantiene los tokens para repartir (no llama al `mint` )
 * El contrato Airdrop tiene que verificar que el `totalSupply`  del token no sobrepase el millón
 * El método `participateInAirdrop` le permite participar por un número random de tokens de 1000 - 5000 tokens
+ $ npx hardhat test test/DesafioTesting_7.js
 */
 
 interface IMiPrimerTKN {
     function transfer(address to, uint256 amount) external returns (bool);
 
     function balanceOf(address account) external view returns (uint256);
+
 }
 
 contract AirdropTwo is Pausable, AccessControl {
+    bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
+
+    struct Participant {
+        address participantAddress;
+        uint256 participations;
+        uint256 limiteParticipaciones;
+        uint256 lastTimeParticipated;
+    }
+
+    mapping (address => Participant) public participantes;
+
+    // instanciamos el token en el contrato
     IMiPrimerTKN miPrimerToken;
-
-    // Mapeo para llevar un registro de las participaciones de cada usuario
-    mapping(address => uint256) public participaciones;
-    mapping(address => uint256) public ultimaVezParticipado;
-
-    // Límite de participaciones por día y total
-    uint256 public limiteDiario = 1;
-    uint256 public limiteTotal = 10;
-
-    // Días adicionales para el referente
-    uint256 public diasAdicionalesPorReferido = 3;
-
-    // Evento para registrar las participaciones
-    event Participacion(address indexed participante, uint256 tokens);
-
+    
     constructor(address _tokenAddress) {
+        _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
+        _grantRole(PAUSER_ROLE, msg.sender);
+
         miPrimerToken = IMiPrimerTKN(_tokenAddress);
     }
 
-    function participateInAirdrop() public whenNotPaused {
-        address participante = msg.sender;
-
-        // Verificar límite diario
-        require(participaciones[participante] < limiteDiario, "Ya participaste en el ultimo dia");
-
-        // Verificar límite total
-        require(participaciones[participante] < limiteTotal, "Llegaste al limite de participaciones");
-
-        // Verificar que el contrato tenga suficientes tokens
-        uint256 balanceContrato = miPrimerToken.balanceOf(address(this));
-        require(balanceContrato >= 1000, "El contrato Airdrop no tiene tokens suficientes");
-
-        // Calcular tokens aleatorios
-        uint256 tokensGanados = _getRadomNumber10005000();
-
-        // Transferir tokens al participante
-        miPrimerToken.transfer(participante, tokensGanados);
-
-        // Registrar participación
-        participaciones[participante]++;
-        ultimaVezParticipado[participante] = block.timestamp;
-
-        emit Participacion(participante, tokensGanados);
+    function participateInAirdrop() public {
+        _participateInAirdrop(address(0));
     }
 
-    function participateInAirdrop(address _elQueRefirio) public whenNotPaused {
-        address participante = msg.sender;
-        address referente = _elQueRefirio;
+    function participateInAirdrop(address _elQueRefirio) public {   
+        _participateInAirdrop(_elQueRefirio);
+    }
 
-        // Verificar que no pueda referirse a sí mismo
-        require(participante != referente, "No puedes autoreferirte");
+    function _participateInAirdrop(address _elQueRefirio) private{
+        // Verificar si ya ha participado antes o no
+        if(participantes[msg.sender].participantAddress == address(0)){
+            Participant memory newParticipant = Participant({participantAddress: msg.sender, participations: 1, limiteParticipaciones: 10, lastTimeParticipated: block.timestamp});
+            participantes[msg.sender] = newParticipant;
+        } else {
+            Participant memory participant = participantes[msg.sender];
+            // Verificar si ya participo ese mismo dia
+            require(participant.lastTimeParticipated + 1 days < block.timestamp, "Ya participaste en el ultimo dia");
+            // Verificar si no ha alcnazado el limite de participaciones
+            require(participant.participations < participant.limiteParticipaciones, "Llegaste limite de participaciones");
 
-        // Verificar límite diario
-        require(participaciones[participante] < limiteDiario, "Ya participaste en el ultimo dia");
+            participantes[msg.sender].participations++;
+            participantes[msg.sender].lastTimeParticipated = block.timestamp;
 
-        // Verificar límite total
-        require(participaciones[participante] < limiteTotal, "Llegaste al limite de participaciones");
-
-        // Verificar que el contrato tenga suficientes tokens
-        uint256 balanceContrato = miPrimerToken.balanceOf(address(this));
-        require(balanceContrato >= 1000, "El contrato Airdrop no tiene tokens suficientes");
-
-        // Calcular tokens aleatorios
-        uint256 tokensGanados = _getRadomNumber10005000();
-
-        // Transferir tokens al participante
-        miPrimerToken.transfer(participante, tokensGanados);
-
-        // Registrar participación
-        participaciones[participante]++;
-        ultimaVezParticipado[participante] = block.timestamp;
-
-        // Si el referente existe, aumentar su límite de participación
-        if (participaciones[referente] > 0) {
-            limiteTotal += diasAdicionalesPorReferido;
         }
 
-        emit Participacion(participante, tokensGanados);
+        uint256 semiRandomTokens = _getRadomNumber10005000();
+        uint256 balanceTokensAirdrop = miPrimerToken.balanceOf(address(this));
+
+        // Verificar que el contrato tiene suficientes tokens
+        require(balanceTokensAirdrop >= semiRandomTokens, "El contrato Airdrop no tiene tokens suficientes");
+        // Verificar que no se exceda el millon de tokens
+        require(balanceTokensAirdrop + semiRandomTokens <= 10 ** 6 * 10 ** 18);
+        
+        miPrimerToken.transfer(msg.sender, semiRandomTokens);
+        
+         //Verificar que no puede autoreferirse
+        require(_elQueRefirio != msg.sender, "No puede autoreferirse");
+
+        if(_elQueRefirio != address(0)){
+           _operateReferred(_elQueRefirio);
+    }
+        
+
+}
+    
+
+    ///////////////////////////////////////////////////////////////
+    ////                     HELPER FUNCTIONS                  ////
+    ///////////////////////////////////////////////////////////////
+
+    function _getRadomNumber10005000() internal view returns (uint256) {
+        return
+            (uint256(keccak256(abi.encodePacked(block.timestamp, msg.sender))) %
+                4000) +
+            1000 +
+            1;
     }
 
-     function setTokenAddress(address _tokenAddress) external {
-        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
+    function setTokenAddress(address _tokenAddress) external {
         miPrimerToken = IMiPrimerTKN(_tokenAddress);
     }
 
-    function _getRadomNumber10005000() internal view returns (uint256) {
-        return (uint256(keccak256(abi.encodePacked(block.timestamp, msg.sender))) % 4000) + 1000;
+    function transferTokensFromSmartContract()
+        external
+        onlyRole(DEFAULT_ADMIN_ROLE)
+    {
+        
+        miPrimerToken.transfer(
+            msg.sender,
+            miPrimerToken.balanceOf(address(this))
+        );
+    }
+
+    function _operateReferred(address _elQueRefirio) internal{
+        Participant storage referredParticipant = participantes[_elQueRefirio];
+
+        if(referredParticipant.participantAddress != address(0)){
+            referredParticipant.limiteParticipaciones += 3;
+            referredParticipant.lastTimeParticipated = block.timestamp;
+        } else{
+            Participant memory newParticipant = Participant({participantAddress: _elQueRefirio, participations: 0, limiteParticipaciones: 13, lastTimeParticipated: block.timestamp});
+            participantes[_elQueRefirio] = newParticipant;
+        }
     }
 }
-

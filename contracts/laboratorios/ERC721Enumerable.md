@@ -173,8 +173,24 @@ Ahora, vamos a listar los NFTs del `Propietario` y `Destinatario` después de la
 ## Preguntas
 
 1. ¿Qué diferencias clave existen entre los estándares `ERC721` y `ERC721Enumerable` en términos de funcionalidad y usabilidad?
+
+ La principal diferencia entre ERC721 y ERC721Enumerable es que el segundo agrega 3 nuevos metodos siendo totalSupply , tokenByIndex, tokenOfOwnerByIndex y  la capacidad de enumerar tokens, tanto para todos los tokens en el contrato como para los tokens de un propietario específico. Esto facilita la exploración de tokens en el contrato y es útil en casos de uso donde se necesita conocer la colección completa de tokens o los tokens de un propietario específico.
+
+
 2. ¿Cómo se pueden utilizar las funciones `tokenOfOwnerByIndex` y `tokenByIndex` para enumerar y listar los NFTs de un propietario específico, y cuándo sería útil hacerlo en una aplicación?
+
+tokenOfOwnerByIndex: Esta función permite enumerar y listar los NFTs de un propietario específico. Se le proporciona la dirección del propietario y un índice, y devuelve el token ID en la posición especificada de la colección del propietario.
+
+Esto sería útil en aplicaciones que deseen mostrar la colección completa de NFTs de un usuario. Por ejemplo, en una billetera de NFTs o un mercado, puedes utilizar esta función para mostrar todos los NFTs que un usuario ha adquirido.
+
+
+tokenByIndex: Esta función permite enumerar y listar todos los NFTs en el contrato, independientemente de su propietario. Se le proporciona un índice y devuelve el token ID en la posición especificada de todos los NFTs en el contrato.
+
+Esta función sería útil en aplicaciones que deseen mostrar todos los NFTs disponibles en el mercado, en una galería de arte digital o en cualquier otra plataforma donde se desee enumerar todos los NFTs en el contrato.
+
 3. ¿Cuáles son algunas posibles vulnerabilidades o desafíos en la gestión de NFTs en contratos inteligentes, y cómo se pueden abordar utilizando estándares como `ERC721Enumerable`?
+
+Una posible vulnerabilidad en la gestión de NFTs en contratos inteligentes es la "enumeración costosa". Si un contrato tiene una gran cantidad de NFTs y no implementa un mecanismo eficiente para enumerarlos, puede resultar en un alto consumo de gas al intentar enumerar todos los tokens. El estándar ERC721Enumerable aborda esta vulnerabilidad al proporcionar funciones que permiten la enumeración eficiente de tokens sin requerir una iteración completa.
 
 ## Tareas
 
@@ -186,7 +202,7 @@ Ahora, vamos a listar los NFTs del `Propietario` y `Destinatario` después de la
    function getNftsFromWallet(address account) public view returns(uint256[] memory result);
    ```
 
-3. Publica el contrato en Mumbai y pega el `address` aquí:
+3. Publica el contrato en Mumbai y pega el `address` aquí: 0xC3382E9Aa90745e4D946BC2e5CF241D3C2f15647
 
 4. Una billetera será el `Propietario` y otra `Destinatario`. `Propietario` debe acuñar 10 token IDs que son los siguientes: 2, 4, 6, 8, 10, 12, 14, 16, 18, 20. `Propietario` debe transferir a `Destinatario` los siguientes tokens: 4, 10, 14, 16 y 18.
 
