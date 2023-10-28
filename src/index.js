@@ -48,7 +48,7 @@ function setUpListeners() {
         .creaSubasta(inputStartTime.value, inputEndTime.value, { value: 1 });
       // Para enviar Ether usar: {value: etherAmount}
       // Esperar que se valide un bloque con await tx.wait();
-      var res = await tx.wait();
+      var res = await tx.data();
       // De la respuesta sacar el transaction Hash
       console.log(res.hash);
       // await subastaContract.creaSubasta

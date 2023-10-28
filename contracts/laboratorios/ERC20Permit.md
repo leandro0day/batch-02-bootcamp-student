@@ -99,7 +99,7 @@ Veámoslo gráficamente:
 
 1. Generar la firma off-chain (fuera del blockchain) implica cierta complejidad. Para enfocarnos en lo más importante, he creado un archivo (`./scripts/erc20Permit.js`) que abstrae la generación de firmas off-chain. Puedes revisarlo detenidamente para comprender su funcionamiento y seguir los anotaciones. Estamos usando la librería `Hardhat`. El resultado es un script que se ejecutará dentro del contexto de `Hardhat`, como le veremos más adelante.
 
-2. En el archivo `./scripts/erc20Permit.js`, hay dos variables que vas a modificar: `tokenAddress` y `spenderAddress`. En mi caso en particular lo reemplazo de este modo:
+2. En el archivo `./scripts/p`, hay dos variables que vas a modificar: `tokenAddress` y `spenderAddress`. En mi caso en particular lo reemplazo de este modo:
 
    ```javascript
    ////////////////////////// VARIABLES A CAMBIAR ///////////////////////
